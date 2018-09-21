@@ -1,7 +1,7 @@
 'use strict';
 
 const gulpIf = require('gulp-if');
-const lazypipe = require('lazypipe');
+const combine = require('stream-combiner');
 const replace = require('gulp-replace');
 const size = require('gulp-size');
 
@@ -18,6 +18,6 @@ function injectCustomElementsES5Adaptor() {
 	);
 };
 
-module.exports = lazypipe()
-	.pipe(() => gulpIf('*.html', injectCustomElementsES5Adaptor()))
-	.pipe(() => size({title: 'inject-custom-elements-es5-adapter'}));
+module.exports = combine(
+	gulpIf('*.html', injectCustomElementsES5Adaptor()),
+	size({title: 'inject-custom-elements-es5-adapter'}));

@@ -1,9 +1,10 @@
 'use strict';
 
+const combine = require('stream-combiner');
+
 const addCacheBusting = require('./add-cache-busting.js');
 const addCspCompliance = require('./add-csp-compliance.js');
 const injectCustomElementsEs5Adapter = require('./inject-custom-elements-es5-adapter.js');
-const lazypipe = require('lazypipe');
 const optimizeAssets = require('./optimize-assets.js');
 const polymerBuild = require('./polymer-build.js');
 
@@ -14,12 +15,13 @@ const polymerBuild = require('./polymer-build.js');
  * @return
  */
 function build(config) {
-	return lazypipe()
-		.pipe(() => polymerBuild(config))
-		.pipe(() => addCspCompliance())
-		.pipe(() => addCacheBusting())
-		.pipe(() => optimizeAssets())
-		.pipe(() => injectCustomElementsEs5Adapter());
+	return combine(
+		polymerBuild(config).on('error', e => console.log(e.message)),
+		addCspCompliance,
+		addCacheBusting,
+		optimizeAssets,
+		injectCustomElementsEs5Adapter
+	);
 }
 
 module.exports = build;

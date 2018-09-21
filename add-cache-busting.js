@@ -1,7 +1,7 @@
 'use strict';
 
 const filter = require('gulp-filter');
-const lazypipe = require('lazypipe');
+const combine = require('stream-combiner');
 const rev = require('gulp-rev');
 const revReplace = require('gulp-rev-replace');
 const size = require('gulp-size');
@@ -24,15 +24,15 @@ function removePathFromJSfile(filename) {
 /**
  * Adds cache busting to the element/elements.html file
  */
-module.exports = lazypipe()
-	.pipe(() => elementsFilter)
-	.pipe(rev)
-	.pipe(() => size({title: 'add-cache-busting'}))
-	.pipe(() => elementsFilter.restore)
-	.pipe(() => indexFilter)
-	.pipe(() => revReplace({
+module.exports = combine(
+	elementsFilter,
+	rev(),
+	size({title: 'add-cache-busting'}),
+	elementsFilter.restore,
+	indexFilter,
+	revReplace({
 		modifyUnreved: removePathFromJSfile,
 		modifyReved: removePathFromJSfile,
-	}))
-	.pipe(() => size({title: 'add-cache-busting (replace)'}))
-	.pipe(() => indexFilter.restore);
+	}),
+	size({title: 'add-cache-busting (replace)'}),
+	indexFilter.restore);
